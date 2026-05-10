@@ -9,6 +9,3 @@ Sistem za praćenje i analizu performansi vetrogeneratora
 
 ## Tim
 - Milica Dukic PR65/2023
-
-## Status
-U izradi
