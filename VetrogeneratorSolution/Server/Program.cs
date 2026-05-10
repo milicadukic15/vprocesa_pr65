@@ -17,6 +17,9 @@ namespace Server
                 Console.WriteLine("===========================================");
                 Console.WriteLine();
 
+                // Pretplata na događaje PRE nego što se servis pokrene
+                SubscribeToEvents();
+
                 // Kreiranje ServiceHost-a
                 host = new ServiceHost(typeof(WindTurbineService));
 
@@ -74,6 +77,56 @@ namespace Server
                 Console.WriteLine("Press any key to exit...");
                 Console.ReadKey();
             }
+        }
+
+        private static void SubscribeToEvents()
+        {
+            var eventPublisher = Events.EventPublisher.Instance;
+
+            // Pretplata na TransferStarted
+            eventPublisher.OnTransferStarted += (sender, e) =>
+            {
+                Console.WriteLine();
+                Console.WriteLine("╔════════════════════════════════════════╗");
+                Console.WriteLine($"║  TRANSFER STARTED                      ║");
+                Console.WriteLine("╠════════════════════════════════════════╣");
+                Console.WriteLine($"║  Turbine: {e.TurbineId,-28} ║");
+                Console.WriteLine($"║  File:    {e.FileName,-28} ║");
+                Console.WriteLine($"║  Time:    {e.StartTime:yyyy-MM-dd HH:mm:ss}        ║");
+                Console.WriteLine("╚════════════════════════════════════════╝");
+                Console.WriteLine();
+            };
+
+            // Pretplata na SampleReceived
+            eventPublisher.OnSampleReceived += (sender, e) =>
+            {
+                Console.WriteLine($"[EVENT] Sample milestone: {e.SampleCount} samples received from {e.TurbineId}");
+            };
+
+            // Pretplata na TransferCompleted
+            eventPublisher.OnTransferCompleted += (sender, e) =>
+            {
+                Console.WriteLine();
+                Console.WriteLine("╔════════════════════════════════════════╗");
+                Console.WriteLine($"║  TRANSFER COMPLETED                    ║");
+                Console.WriteLine("╠════════════════════════════════════════╣");
+                Console.WriteLine($"║  Turbine:  {e.TurbineId,-27} ║");
+                Console.WriteLine($"║  Received: {e.TotalSamplesReceived,-27} ║");
+                Console.WriteLine($"║  Rejected: {e.TotalSamplesRejected,-27} ║");
+                Console.WriteLine($"║  Time:     {e.EndTime:yyyy-MM-dd HH:mm:ss}        ║");
+                Console.WriteLine("╚════════════════════════════════════════╝");
+                Console.WriteLine();
+            };
+
+            // Pretplata na Warning događaje
+            eventPublisher.OnWarningRaised += (sender, e) =>
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"[WARNING] [{e.WarningType}] {e.TurbineId} @ {e.Timestamp:HH:mm:ss}: {e.Message}");
+                Console.ResetColor();
+            };
+
+            Console.WriteLine("[INFO] Event subscriptions initialized.");
         }
     }
 }

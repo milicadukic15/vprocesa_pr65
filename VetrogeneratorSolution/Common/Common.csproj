@@ -60,6 +60,7 @@
   <ItemGroup>
     <Compile Include="Contracts\IWindTurbineService.cs" />
     <Compile Include="DataModels\SessionMetadata.cs" />
+    <Compile Include="DataModels\WarningEventArgs.cs" />
     <Compile Include="DataModels\WindTurbineSample.cs" />
     <Compile Include="Exceptions\DataFormatFault.cs" />
     <Compile Include="Exceptions\ValidationFault.cs" />

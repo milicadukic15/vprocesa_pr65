@@ -15,6 +15,9 @@ namespace Server.Services
         private SessionMetadata currentSession;
         private bool disposed = false;
 
+        private int totalSamplesReceived = 0;
+        private int totalSamplesRejected = 0;
+
         public WindTurbineService()
         {
             validator = new DataValidator();
@@ -37,10 +40,18 @@ namespace Server.Services
 
                 currentSession = metadata;
 
-                // Kreiranje FileManager-a za ovu sesiju
                 fileManager = new FileManager(metadata.TurbineId, metadata.StartTime);
 
+                totalSamplesReceived = 0;
+                totalSamplesRejected = 0;
+
                 Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Session started successfully. Output: {fileManager.SessionFilePath}");
+
+                Events.EventPublisher.Instance.RaiseTransferStarted(
+                    metadata.TurbineId,
+                    metadata.StartTime,
+                    metadata.FileName
+                );
             }
             catch (FaultException)
             {
@@ -65,30 +76,39 @@ namespace Server.Services
                     throw new FaultException("No active session. Call StartSession first.");
                 }
 
-                // Validacija uzorka
                 validator.ValidateSample(sample);
 
-                // Snimanje u fajl
                 fileManager.WriteSample(sample);
 
-                // Console feedback (opciono, ne loguj svaki red jer će biti previše)
-                if (sample.RowIndex % 1000 == 0)
+                totalSamplesReceived++;
+
+                if (totalSamplesReceived % 1000 == 0)
                 {
-                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Processed {sample.RowIndex} samples...");
+                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Processed {totalSamplesReceived} samples...");
+                }
+
+                if (totalSamplesReceived % 500 == 0)
+                {
+                    Events.EventPublisher.Instance.RaiseSampleReceived(
+                        currentSession.TurbineId,
+                        totalSamplesReceived,
+                        0 // Total samples nije poznat serveru
+                    );
                 }
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
-                // Logovanje rejected uzorka
                 if (fileManager != null)
                 {
                     fileManager.WriteRejectedSample(sample, ex.Message);
                 }
 
+                totalSamplesRejected++;
+
                 // Opciono: loguj SAMO svakih 100 rejection-a da ne spamuje konzolu
-                if (sample.RowIndex % 100 == 0)
+                if (totalSamplesRejected % 100 == 0)
                 {
-                    Console.WriteLine($"[WARNING] Sample rejected (Row {sample.RowIndex}): {ex.Message}");
+                    Console.WriteLine($"[WARNING] {totalSamplesRejected} samples rejected so far...");
                 }
             }
         }
@@ -98,6 +118,15 @@ namespace Server.Services
             try
             {
                 Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Ending session...");
+                Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Total received: {totalSamplesReceived}, Total rejected: {totalSamplesRejected}");
+
+                // Podignuti TransferCompleted događaj
+                Events.EventPublisher.Instance.RaiseTransferCompleted(
+                    currentSession?.TurbineId ?? "Unknown",
+                    DateTime.Now,
+                    totalSamplesReceived,
+                    totalSamplesRejected
+                );
 
                 Dispose();
 

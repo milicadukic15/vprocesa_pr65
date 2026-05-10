@@ -63,6 +63,7 @@
   <ItemGroup>
     <Compile Include="BussinesLogic\DataValidator.cs" />
     <Compile Include="BussinesLogic\FileManager.cs" />
+    <Compile Include="Events\EventPublisher.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\WindTurbineService.cs" />
@@ -77,8 +78,6 @@
       <Name>Common</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Events\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
