@@ -18,9 +18,12 @@ namespace Server.Services
         private int totalSamplesReceived = 0;
         private int totalSamplesRejected = 0;
 
+        private BusinessLogic.AnalyticsEngine analyticsEngine;
+
         public WindTurbineService()
         {
             validator = new DataValidator();
+            analyticsEngine = new BusinessLogic.AnalyticsEngine();
         }
 
         public void StartSession(SessionMetadata metadata)
@@ -44,6 +47,8 @@ namespace Server.Services
 
                 totalSamplesReceived = 0;
                 totalSamplesRejected = 0;
+
+                analyticsEngine.Reset();
 
                 Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Session started successfully. Output: {fileManager.SessionFilePath}");
 
@@ -81,6 +86,8 @@ namespace Server.Services
                 fileManager.WriteSample(sample);
 
                 totalSamplesReceived++;
+
+                analyticsEngine.AnalyzeSample(sample);
 
                 if (totalSamplesReceived % 1000 == 0)
                 {

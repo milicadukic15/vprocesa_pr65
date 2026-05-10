@@ -61,6 +61,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BussinesLogic\AnalyticsEngine.cs" />
     <Compile Include="BussinesLogic\DataValidator.cs" />
     <Compile Include="BussinesLogic\FileManager.cs" />
     <Compile Include="Events\EventPublisher.cs" />
