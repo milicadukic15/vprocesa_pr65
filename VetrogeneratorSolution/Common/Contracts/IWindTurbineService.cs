@@ -8,25 +8,19 @@ namespace Common.Contracts
     [ServiceContract]
     public interface IWindTurbineService
     {
-        /// <summary>
-        /// Pokreće novu sesiju prenosa podataka za određenu turbinu
-        /// </summary>
+        // Pokreće novu sesiju prenosa podataka za određenu turbinu
         [OperationContract]
         [FaultContract(typeof(DataFormatFault))]
         [FaultContract(typeof(ValidationFault))]
         void StartSession(SessionMetadata metadata);
 
-        /// <summary>
-        /// Šalje jedan uzorak (red iz CSV-a) serveru
-        /// </summary>
+        // Šalje jedan uzorak (red iz CSV-a) serveru
         [OperationContract]
         [FaultContract(typeof(DataFormatFault))]
         [FaultContract(typeof(ValidationFault))]
         void PushSample(WindTurbineSample sample);
 
-        /// <summary>
-        /// Završava sesiju prenosa
-        /// </summary>
+        // Završava sesiju prenosa
         [OperationContract]
         void EndSession();
     }

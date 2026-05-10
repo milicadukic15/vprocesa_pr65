@@ -6,8 +6,6 @@ namespace Common.DataModels
     [DataContract]
     public class WindTurbineSample
     {
-        // Obavezna polja iz specifikacije (10 kanala + 2 dodatna)
-
         [DataMember]
         public DateTime Timestamp { get; set; }
 

@@ -143,7 +143,6 @@ namespace Client
                     Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Session started.");
                     Console.WriteLine();
 
-                    // PushSample (sekvencijalno, red po red)
                     int successCount = 0;
                     int errorCount = 0;
 
@@ -163,7 +162,6 @@ namespace Client
                         catch (Exception ex)
                         {
                             errorCount++;
-                            // Nastavi sa sledećim uzorkom
                         }
                     }
 

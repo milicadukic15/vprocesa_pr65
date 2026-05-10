@@ -17,13 +17,10 @@ namespace Server
                 Console.WriteLine("===========================================");
                 Console.WriteLine();
 
-                // Pretplata na događaje PRE nego što se servis pokrene
                 SubscribeToEvents();
 
-                // Kreiranje ServiceHost-a
                 host = new ServiceHost(typeof(WindTurbineService));
 
-                // Otvaranje servisa
                 host.Open();
 
                 Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Service started successfully!");
@@ -43,10 +40,8 @@ namespace Server
                 Console.WriteLine("===========================================");
                 Console.WriteLine();
 
-                // Čekanje na Enter
                 Console.ReadLine();
 
-                // Zatvaranje servisa
                 Console.WriteLine();
                 Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Shutting down server...");
                 host.Close();

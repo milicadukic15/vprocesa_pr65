@@ -22,18 +22,14 @@ namespace Server.BusinessLogic
             string dateFolder = startTime.ToString("yyyy-MM-dd");
             string outputDirectory = Path.Combine(basePath, turbineId, dateFolder);
 
-            // Kreiranje direktorijuma ako ne postoji
             Directory.CreateDirectory(outputDirectory);
 
-            // Putanje do fajlova
             SessionFilePath = Path.Combine(outputDirectory, "session.csv");
             RejectsFilePath = Path.Combine(outputDirectory, "rejects.csv");
 
-            // Otvaranje stream-ova
             sessionWriter = new StreamWriter(SessionFilePath, append: false);
             rejectsWriter = new StreamWriter(RejectsFilePath, append: false);
 
-            // Pisanje header-a
             WriteSessionHeader();
             WriteRejectsHeader();
         }
@@ -71,7 +67,7 @@ namespace Server.BusinessLogic
             );
 
             sessionWriter.WriteLine(line);
-            sessionWriter.Flush(); // Flush posle svakog reda za sigurnost
+            sessionWriter.Flush(); 
         }
 
         public void WriteRejectedSample(WindTurbineSample sample, string reason)
@@ -86,7 +82,7 @@ namespace Server.BusinessLogic
                 DateTime.Now,
                 sample.RowIndex,
                 sample.TurbineId,
-                reason.Replace(",", ";"), // Escape commas
+                reason.Replace(",", ";"), 
                 originalLine
             );
 
@@ -106,7 +102,6 @@ namespace Server.BusinessLogic
             {
                 if (disposing)
                 {
-                    // Dispose managed resources
                     if (sessionWriter != null)
                     {
                         sessionWriter.Flush();

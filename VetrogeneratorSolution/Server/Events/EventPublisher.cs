@@ -3,7 +3,6 @@ using Common.DataModels;
 
 namespace Server.Events
 {
-    /// Centralna klasa za sve događaje u sistemu
     /// Implementira Publish-Subscribe pattern
     public class EventPublisher
     {
@@ -46,7 +45,6 @@ namespace Server.Events
         public event TransferCompletedEventHandler OnTransferCompleted;
         public event WarningRaisedEventHandler OnWarningRaised;
 
-        // Metode za podizanje događaja
         public void RaiseTransferStarted(string turbineId, DateTime startTime, string fileName)
         {
             OnTransferStarted?.Invoke(this, new TransferStartedEventArgs(turbineId, startTime, fileName));

@@ -49,7 +49,6 @@ namespace Client.Services
                     {
                         lineNumber++;
 
-                        // Skip prvih 9 redova
                         if (lineNumber < HEADER_ROW)
                             continue;
 
@@ -92,7 +91,6 @@ namespace Client.Services
                         {
                             string errorMsg = $"Row {lineNumber}: {ex.Message}";
                             errors.Add(errorMsg);
-                            // Nastavi sa sledećim redom (ne prekidaj)
                         }
                     }
                 }
@@ -115,7 +113,6 @@ namespace Client.Services
         {
             var map = new Dictionary<string, int>();
 
-            // Pronađi indekse potrebnih kolona
             for (int i = 0; i < headers.Length; i++)
             {
                 string header = headers[i].Trim();
@@ -146,7 +143,6 @@ namespace Client.Services
 
             try
             {
-                // Parsiranje koristeći mapu indeksa
                 sample.Timestamp = DateTime.Parse(
                     fields[columnIndexMap[COL_NAME_TIMESTAMP]],
                     CultureInfo.InvariantCulture
@@ -196,7 +192,6 @@ namespace Client.Services
                 return files;
             }
 
-            // Učitaj sve .csv fajlove
             var allCsvFiles = Directory.GetFiles(dataPath, "*.csv");
 
             foreach (var file in allCsvFiles)
