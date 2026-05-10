@@ -2,26 +2,30 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using Common.DataModels;
+using Microsoft.VisualBasic.FileIO;
 
 namespace Client.Services
 {
     public class CsvReader
     {
-        private const int HEADER_ROW = 10; // Red 10 (index 9) je header
-        private const int DATA_START_ROW = 11; // Podaci počinju od reda 11 (index 10)
+        private const int HEADER_ROW = 10; // Red 10 je header
+        private const int DATA_START_ROW = 11; // Podaci počinju od reda 11
 
-        // Indeksi kolona koje nas zanimaju (0-based)
-        private const int COL_TIMESTAMP = 0;
-        private const int COL_WIND_SPEED = 1;
-        private const int COL_WIND_DIRECTION = 14;
-        private const int COL_NACELLE_POSITION = 15;
-        private const int COL_POWER_KW = 61;
-        private const int COL_POTENTIAL_POWER_KW = 62;
-        private const int COL_POWER_FACTOR = 81;
-        private const int COL_REACTIVE_POWER_KVAR = 85;
-        private const int COL_GRID_FREQUENCY_HZ = 268;
-        private const int COL_GENERATOR_RPM = 224;
+        // Nazivi kolona koje tražimo
+        private const string COL_NAME_TIMESTAMP = "# Date and time";
+        private const string COL_NAME_WIND_SPEED = "Wind speed (m/s)";
+        private const string COL_NAME_WIND_DIRECTION = "Wind direction (°)";
+        private const string COL_NAME_NACELLE_POSITION = "Nacelle position (°)";
+        private const string COL_NAME_POWER_KW = "Power (kW)";
+        private const string COL_NAME_POTENTIAL_POWER_KW = "Potential power default PC (kW)";
+        private const string COL_NAME_POWER_FACTOR = "Power factor (cosphi)";
+        private const string COL_NAME_REACTIVE_POWER_KVAR = "Reactive power (kvar)";
+        private const string COL_NAME_GRID_FREQUENCY_HZ = "Grid frequency (Hz)";
+        private const string COL_NAME_GENERATOR_RPM = "Generator RPM (RPM)";
+
+        private Dictionary<string, int> columnIndexMap;
 
         public List<WindTurbineSample> ReadCsvFile(string filePath, string turbineId, out List<string> errors)
         {
@@ -40,38 +44,55 @@ namespace Client.Services
                 {
                     string line;
                     int lineNumber = 0;
-                    string[] headers = null;
 
                     while ((line = reader.ReadLine()) != null)
                     {
                         lineNumber++;
 
-                        // Skip prvih 9 redova (komentari/metadata)
+                        // Skip prvih 9 redova
                         if (lineNumber < HEADER_ROW)
                             continue;
 
-                        // Red 10 je header
+                        // Red 10 je header - kreiraj mapu kolona
                         if (lineNumber == HEADER_ROW)
                         {
-                            headers = line.Split(',');
+                            string[] headers = ParseCsvLine(line);
                             Console.WriteLine($"[INFO] Header found: {headers.Length} columns");
+
+                            columnIndexMap = BuildColumnIndexMap(headers);
+
+                            // Provera da li smo našli sve potrebne kolone
+                            if (columnIndexMap.Count < 10)
+                            {
+                                errors.Add("Missing required columns in CSV header");
+                                Console.WriteLine("[ERROR] Could not find all required columns!");
+                                return samples;
+                            }
+
+                            Console.WriteLine("[INFO] Successfully mapped all required columns.");
                             continue;
                         }
 
                         // Od reda 11 - parsiranje podataka
                         try
                         {
-                            var sample = ParseLine(line, lineNumber, turbineId);
+                            string[] fields = ParseCsvLine(line); // ← Parsiraj prvo
+                            var sample = ParseLine(fields, lineNumber, turbineId);
                             if (sample != null)
                             {
                                 samples.Add(sample);
+                            }
+
+                            if (lineNumber % 1000 == 0)
+                            {
+                                Console.WriteLine($"[PROGRESS] Processing row {lineNumber}... ({samples.Count} valid samples so far)");
                             }
                         }
                         catch (Exception ex)
                         {
                             string errorMsg = $"Row {lineNumber}: {ex.Message}";
                             errors.Add(errorMsg);
-                            // Nastavi sa sledećim redom
+                            // Nastavi sa sledećim redom (ne prekidaj)
                         }
                     }
                 }
@@ -79,7 +100,7 @@ namespace Client.Services
                 Console.WriteLine($"[INFO] Successfully parsed {samples.Count} samples from {Path.GetFileName(filePath)}");
                 if (errors.Count > 0)
                 {
-                    Console.WriteLine($"[WARNING] {errors.Count} rows had parsing errors");
+                    Console.WriteLine($"[WARNING] {errors.Count} rows had parsing errors (NaN values or invalid data)");
                 }
             }
             catch (Exception ex)
@@ -90,15 +111,32 @@ namespace Client.Services
             return samples;
         }
 
-        private WindTurbineSample ParseLine(string line, int lineNumber, string turbineId)
+        private Dictionary<string, int> BuildColumnIndexMap(string[] headers)
         {
-            string[] fields = line.Split(',');
+            var map = new Dictionary<string, int>();
 
-            // Provera broja kolona
-            if (fields.Length < 270) // Minimalno kolona koje nam trebaju
+            // Pronađi indekse potrebnih kolona
+            for (int i = 0; i < headers.Length; i++)
             {
-                throw new FormatException($"Insufficient columns: {fields.Length}");
+                string header = headers[i].Trim();
+
+                if (header == COL_NAME_TIMESTAMP) map[COL_NAME_TIMESTAMP] = i;
+                else if (header == COL_NAME_WIND_SPEED) map[COL_NAME_WIND_SPEED] = i;
+                else if (header == COL_NAME_WIND_DIRECTION) map[COL_NAME_WIND_DIRECTION] = i;
+                else if (header == COL_NAME_NACELLE_POSITION) map[COL_NAME_NACELLE_POSITION] = i;
+                else if (header == COL_NAME_POWER_KW) map[COL_NAME_POWER_KW] = i;
+                else if (header == COL_NAME_POTENTIAL_POWER_KW) map[COL_NAME_POTENTIAL_POWER_KW] = i;
+                else if (header == COL_NAME_POWER_FACTOR) map[COL_NAME_POWER_FACTOR] = i;
+                else if (header == COL_NAME_REACTIVE_POWER_KVAR) map[COL_NAME_REACTIVE_POWER_KVAR] = i;
+                else if (header == COL_NAME_GRID_FREQUENCY_HZ) map[COL_NAME_GRID_FREQUENCY_HZ] = i;
+                else if (header == COL_NAME_GENERATOR_RPM) map[COL_NAME_GENERATOR_RPM] = i;
             }
+
+            return map;
+        }
+
+        private WindTurbineSample ParseLine(string[] fields, int lineNumber, string turbineId)
+        {
 
             var sample = new WindTurbineSample
             {
@@ -106,22 +144,23 @@ namespace Client.Services
                 TurbineId = turbineId
             };
 
-            // Parsiranje sa InvariantCulture (decimalna tačka)
             try
             {
-                // Timestamp
-                sample.Timestamp = DateTime.Parse(fields[COL_TIMESTAMP], CultureInfo.InvariantCulture);
+                // Parsiranje koristeći mapu indeksa
+                sample.Timestamp = DateTime.Parse(
+                    fields[columnIndexMap[COL_NAME_TIMESTAMP]],
+                    CultureInfo.InvariantCulture
+                );
 
-                // Numeričke vrednosti - provera za NaN
-                sample.WindSpeed = ParseDoubleOrThrow(fields[COL_WIND_SPEED], "WindSpeed");
-                sample.WindDirection = ParseDoubleOrThrow(fields[COL_WIND_DIRECTION], "WindDirection");
-                sample.NacellePosition = ParseDoubleOrThrow(fields[COL_NACELLE_POSITION], "NacellePosition");
-                sample.PowerKW = ParseDoubleOrThrow(fields[COL_POWER_KW], "PowerKW");
-                sample.PotentialPowerDefaultKW = ParseDoubleOrThrow(fields[COL_POTENTIAL_POWER_KW], "PotentialPowerDefaultKW");
-                sample.PowerFactor = ParseDoubleOrThrow(fields[COL_POWER_FACTOR], "PowerFactor");
-                sample.ReactivePowerKvar = ParseDoubleOrThrow(fields[COL_REACTIVE_POWER_KVAR], "ReactivePowerKvar");
-                sample.GridFrequencyHz = ParseDoubleOrThrow(fields[COL_GRID_FREQUENCY_HZ], "GridFrequencyHz");
-                sample.GeneratorRpm = ParseDoubleOrThrow(fields[COL_GENERATOR_RPM], "GeneratorRpm");
+                sample.WindSpeed = ParseDoubleOrThrow(fields[columnIndexMap[COL_NAME_WIND_SPEED]], "WindSpeed");
+                sample.WindDirection = ParseDoubleOrThrow(fields[columnIndexMap[COL_NAME_WIND_DIRECTION]], "WindDirection");
+                sample.NacellePosition = ParseDoubleOrThrow(fields[columnIndexMap[COL_NAME_NACELLE_POSITION]], "NacellePosition");
+                sample.PowerKW = ParseDoubleOrThrow(fields[columnIndexMap[COL_NAME_POWER_KW]], "PowerKW");
+                sample.PotentialPowerDefaultKW = ParseDoubleOrThrow(fields[columnIndexMap[COL_NAME_POTENTIAL_POWER_KW]], "PotentialPowerDefaultKW");
+                sample.PowerFactor = ParseDoubleOrThrow(fields[columnIndexMap[COL_NAME_POWER_FACTOR]], "PowerFactor");
+                sample.ReactivePowerKvar = ParseDoubleOrThrow(fields[columnIndexMap[COL_NAME_REACTIVE_POWER_KVAR]], "ReactivePowerKvar");
+                sample.GridFrequencyHz = ParseDoubleOrThrow(fields[columnIndexMap[COL_NAME_GRID_FREQUENCY_HZ]], "GridFrequencyHz");
+                sample.GeneratorRpm = ParseDoubleOrThrow(fields[columnIndexMap[COL_NAME_GENERATOR_RPM]], "GeneratorRpm");
             }
             catch (Exception ex)
             {
@@ -157,19 +196,33 @@ namespace Client.Services
                 return files;
             }
 
-            // Pronađi sve Kelmarsh_X.csv fajlove
-            for (int i = 1; i <= 6; i++)
-            {
-                string fileName = $"Kelmarsh_{i}.csv";
-                string fullPath = Path.Combine(dataPath, fileName);
+            // Učitaj sve .csv fajlove
+            var allCsvFiles = Directory.GetFiles(dataPath, "*.csv");
 
-                if (File.Exists(fullPath))
-                {
-                    files.Add(fullPath);
-                }
+            foreach (var file in allCsvFiles)
+            {
+                files.Add(file);
             }
 
             return files;
+        }
+
+        private string[] ParseCsvLine(string line)
+        {
+            // Koristi TextFieldParser za pravilno parsiranje CSV-a sa navodnicima
+            using (var parser = new TextFieldParser(new System.IO.StringReader(line)))
+            {
+                parser.TextFieldType = FieldType.Delimited;
+                parser.SetDelimiters(",");
+                parser.HasFieldsEnclosedInQuotes = true;
+
+                if (!parser.EndOfData)
+                {
+                    return parser.ReadFields();
+                }
+            }
+
+            return new string[0];
         }
     }
 }

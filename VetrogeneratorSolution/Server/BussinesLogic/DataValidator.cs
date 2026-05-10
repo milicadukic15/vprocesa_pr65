@@ -28,19 +28,19 @@ namespace Server.BusinessLogic
                 );
             }
 
-            if (sample.PowerKW < 0 || sample.PowerKW > 5000)
+            if (sample.PowerKW < 0 || sample.PowerKW > 3000)
             {
                 throw new FaultException<ValidationFault>(
                     new ValidationFault("Power out of range", "PowerKW", sample.PowerKW),
-                    "Power must be between 0 and 5000 kW"
+                    "Power must be between 0 and 3000 kW"
                 );
             }
 
-            if (sample.PotentialPowerDefaultKW < 0 || sample.PotentialPowerDefaultKW > 5000)
+            if (sample.PotentialPowerDefaultKW < 0 || sample.PotentialPowerDefaultKW > 3000)
             {
                 throw new FaultException<ValidationFault>(
                     new ValidationFault("Potential power out of range", "PotentialPowerDefaultKW", sample.PotentialPowerDefaultKW),
-                    "Potential power must be between 0 and 5000 kW"
+                    "Potential power must be between 0 and 3000 kW"
                 );
             }
 

@@ -44,7 +44,7 @@ namespace Server.Services
             }
             catch (FaultException)
             {
-                throw; // Re-throw WCF fault exceptions
+                throw; 
             }
             catch (Exception ex)
             {
@@ -72,16 +72,12 @@ namespace Server.Services
                 fileManager.WriteSample(sample);
 
                 // Console feedback (opciono, ne loguj svaki red jer će biti previše)
-                if (sample.RowIndex % 100 == 0)
+                if (sample.RowIndex % 1000 == 0)
                 {
                     Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Processed {sample.RowIndex} samples...");
                 }
             }
-            catch (FaultException)
-            {
-                throw; // Re-throw WCF faults
-            }
-            catch (Exception ex)
+            catch (Exception ex) 
             {
                 // Logovanje rejected uzorka
                 if (fileManager != null)
@@ -89,10 +85,11 @@ namespace Server.Services
                     fileManager.WriteRejectedSample(sample, ex.Message);
                 }
 
-                Console.WriteLine($"[WARNING] Sample rejected (Row {sample.RowIndex}): {ex.Message}");
-
-                // Ne throw-uj exception - nastavi sa sledećim uzorkom
-                // Ovo omogućava da se prenos nastavi čak i ako neki uzorci nisu validni
+                // Opciono: loguj SAMO svakih 100 rejection-a da ne spamuje konzolu
+                if (sample.RowIndex % 100 == 0)
+                {
+                    Console.WriteLine($"[WARNING] Sample rejected (Row {sample.RowIndex}): {ex.Message}");
+                }
             }
         }
 
@@ -124,7 +121,6 @@ namespace Server.Services
             {
                 if (disposing)
                 {
-                    // Dispose managed resources
                     if (fileManager != null)
                     {
                         fileManager.Dispose();
