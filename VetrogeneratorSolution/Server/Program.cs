@@ -78,7 +78,6 @@ namespace Server
         {
             var eventPublisher = Events.EventPublisher.Instance;
 
-            // Pretplata na TransferStarted
             eventPublisher.OnTransferStarted += (sender, e) =>
             {
                 Console.WriteLine();
@@ -92,13 +91,11 @@ namespace Server
                 Console.WriteLine();
             };
 
-            // Pretplata na SampleReceived
             eventPublisher.OnSampleReceived += (sender, e) =>
             {
                 Console.WriteLine($"[EVENT] Sample milestone: {e.SampleCount} samples received from {e.TurbineId}");
             };
 
-            // Pretplata na TransferCompleted
             eventPublisher.OnTransferCompleted += (sender, e) =>
             {
                 Console.WriteLine();
@@ -113,7 +110,6 @@ namespace Server
                 Console.WriteLine();
             };
 
-            // Pretplata na Warning događaje
             eventPublisher.OnWarningRaised += (sender, e) =>
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;

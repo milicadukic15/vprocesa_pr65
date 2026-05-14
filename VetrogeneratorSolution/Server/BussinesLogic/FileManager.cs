@@ -17,7 +17,6 @@ namespace Server.BusinessLogic
 
         public FileManager(string turbineId, DateTime startTime)
         {
-            // Kreiranje strukture: Data/<TurbineID>/<YYYY-MM-DD>/
             string basePath = ConfigurationManager.AppSettings["DataStoragePath"] ?? "Data";
             string dateFolder = startTime.ToString("yyyy-MM-dd");
             string outputDirectory = Path.Combine(basePath, turbineId, dateFolder);
@@ -49,7 +48,6 @@ namespace Server.BusinessLogic
             if (disposed)
                 throw new ObjectDisposedException(nameof(FileManager));
 
-            // Format sa InvariantCulture (decimalna tačka)
             string line = string.Format(CultureInfo.InvariantCulture,
                 "{0:yyyy-MM-dd HH:mm:ss},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11}",
                 sample.Timestamp,
@@ -122,6 +120,7 @@ namespace Server.BusinessLogic
             }
         }
 
+        //finalizer od gc
         ~FileManager()
         {
             Dispose(false);

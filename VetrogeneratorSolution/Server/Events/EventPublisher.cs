@@ -30,7 +30,7 @@ namespace Server.Events
 
         private EventPublisher()
         {
-            // Private constructor za Singleton
+            
         }
 
         // Delegate za događaje

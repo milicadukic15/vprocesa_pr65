@@ -66,7 +66,7 @@ namespace Common.DataModels
         }
     }
 
-    /// Under-performance warning
+
     public class UnderPerformanceWarning : WarningEventArgs
     {
         public double ActualPowerKW { get; set; }
@@ -84,7 +84,6 @@ namespace Common.DataModels
         }
     }
 
-    /// Yaw misalignment warning
     public class YawMisalignmentWarning : WarningEventArgs
     {
         public double WindDirection { get; set; }
@@ -102,7 +101,6 @@ namespace Common.DataModels
         }
     }
 
-    /// Grid frequency deviation warning
     public class FrequencyDeviationWarning : WarningEventArgs
     {
         public double ActualFrequencyHz { get; set; }
@@ -120,7 +118,6 @@ namespace Common.DataModels
         }
     }
 
-    /// Frequency spike warning
     public class FrequencySpikeWarning : WarningEventArgs
     {
         public double PreviousFrequencyHz { get; set; }

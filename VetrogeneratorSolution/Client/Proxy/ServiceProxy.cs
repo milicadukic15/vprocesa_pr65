@@ -15,7 +15,6 @@ namespace Client.Proxy
         {
             try
             {
-                // Kreiranje ChannelFactory-ja sa konfiguracijom iz App.config
                 factory = new ChannelFactory<IWindTurbineService>("WindTurbineServiceEndpoint");
                 channel = factory.CreateChannel();
 
@@ -70,12 +69,11 @@ namespace Client.Proxy
             }
             catch (FaultException<Common.Exceptions.ValidationFault> ex)
             {
-                // Validation errors se loguju ali ne prekidaju prenos
-                // Server će odbaciti uzorak u rejects.csv
+
             }
             catch (FaultException<Common.Exceptions.DataFormatFault> ex)
             {
-                // Format errors se loguju ali ne prekidaju prenos
+
             }
             catch (CommunicationException ex)
             {

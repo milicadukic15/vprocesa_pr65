@@ -16,7 +16,6 @@ namespace Server.BusinessLogic
 
         public AnalyticsEngine()
         {
-            // Učitavanje pragova iz App.config
             underPerformanceAlpha = double.Parse(
                 ConfigurationManager.AppSettings["UnderPerformanceAlpha"] ?? "0.75"
             );
@@ -47,14 +46,11 @@ namespace Server.BusinessLogic
             lastFrequencyHz = sample.GridFrequencyHz;
         }
 
-        /// Provera da li turbina proizvodi manje od alpha * potential power
         private void CheckUnderPerformance(WindTurbineSample sample)
         {
-            // Provera da li postoje validne vrednosti (nisu NaN)
             if (double.IsNaN(sample.PowerKW) || double.IsNaN(sample.PotentialPowerDefaultKW))
                 return;
 
-            // Ignorisati slučajeve kada je potencijalna snaga vrlo mala (turbina stoji)
             if (sample.PotentialPowerDefaultKW < 10)
                 return;
 
@@ -73,16 +69,13 @@ namespace Server.BusinessLogic
             }
         }
 
-        /// Provera yaw misalignment-a (razlika između wind direction i nacelle position)
         private void CheckYawMisalignment(WindTurbineSample sample)
         {
             if (double.IsNaN(sample.WindDirection) || double.IsNaN(sample.NacellePosition))
                 return;
 
-            // Računanje najkraćeg ugaonog odstojanja (uzimajući u obzir 0°/360° wrap)
             double diff = Math.Abs(sample.WindDirection - sample.NacellePosition);
 
-            // Normalizacija na [0, 180] range
             if (diff > 180)
                 diff = 360 - diff;
 
@@ -100,7 +93,6 @@ namespace Server.BusinessLogic
             }
         }
 
-        /// Provera odstupanja frekvencije od nominalne (50 Hz)
         private void CheckFrequencyDeviation(WindTurbineSample sample)
         {
             if (double.IsNaN(sample.GridFrequencyHz))
@@ -122,13 +114,11 @@ namespace Server.BusinessLogic
             }
         }
 
-        /// Provera nagle promene frekvencije između dva uzastopna uzorka
         private void CheckFrequencySpike(WindTurbineSample sample)
         {
             if (double.IsNaN(sample.GridFrequencyHz))
                 return;
 
-            // Preskočiti prvi uzorak (nema prethodnu frekvenciju za poređenje)
             if (!lastFrequencyHz.HasValue)
                 return;
 

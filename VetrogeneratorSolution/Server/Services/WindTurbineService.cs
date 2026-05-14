@@ -32,7 +32,6 @@ namespace Server.Services
             {
                 Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Starting session for Turbine: {metadata.TurbineId}");
 
-                // Validacija metadata
                 if (string.IsNullOrWhiteSpace(metadata.TurbineId))
                 {
                     throw new FaultException<ValidationFault>(
@@ -112,7 +111,6 @@ namespace Server.Services
 
                 totalSamplesRejected++;
 
-                // Opciono: loguj SAMO svakih 100 rejection-a da ne spamuje konzolu
                 if (totalSamplesRejected % 100 == 0)
                 {
                     Console.WriteLine($"[WARNING] {totalSamplesRejected} samples rejected so far...");
@@ -127,7 +125,6 @@ namespace Server.Services
                 Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Ending session...");
                 Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Total received: {totalSamplesReceived}, Total rejected: {totalSamplesRejected}");
 
-                // Podignuti TransferCompleted događaj
                 Events.EventPublisher.Instance.RaiseTransferCompleted(
                     currentSession?.TurbineId ?? "Unknown",
                     DateTime.Now,

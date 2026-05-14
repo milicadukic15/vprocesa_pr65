@@ -18,10 +18,8 @@ namespace Client
             Console.WriteLine("===========================================");
             Console.WriteLine();
 
-            // Učitavanje putanje do Data foldera iz config-a
             string dataPath = ConfigurationManager.AppSettings["DataPath"];
 
-            // Resolve relativnu putanju
             if (!Path.IsPathRooted(dataPath))
             {
                 dataPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, dataPath));
@@ -30,7 +28,6 @@ namespace Client
             Console.WriteLine($"Data folder: {dataPath}");
             Console.WriteLine();
 
-            // Pronalaženje dostupnih CSV fajlova
             var availableFiles = CsvReader.GetAvailableCsvFiles(dataPath);
 
             if (availableFiles.Count == 0)
@@ -50,7 +47,6 @@ namespace Client
             }
             Console.WriteLine();
 
-            // Izbor fajla
             int selectedIndex = -1;
             while (selectedIndex < 0 || selectedIndex >= availableFiles.Count)
             {
@@ -76,7 +72,6 @@ namespace Client
             Console.WriteLine("===========================================");
             Console.WriteLine();
 
-            // Čitanje CSV fajla
             Console.WriteLine("Reading CSV file...");
             var csvReader = new CsvReader();
             List<string> parsingErrors;
@@ -109,7 +104,6 @@ namespace Client
             Console.WriteLine($"Loaded {samples.Count} valid samples.");
             Console.WriteLine();
 
-            // Potvrda za slanje
             Console.Write("Send data to server? (y/n): ");
             string confirm = Console.ReadLine();
 
@@ -127,12 +121,10 @@ namespace Client
             Console.WriteLine("===========================================");
             Console.WriteLine();
 
-            // Slanje podataka serveru
             try
             {
                 using (var proxy = new ServiceProxy())
                 {
-                    // StartSession
                     var metadata = new SessionMetadata(
                         turbineId: $"Kelmarsh_{turbineId}",
                         startTime: samples.First().Timestamp,
@@ -153,7 +145,6 @@ namespace Client
                             proxy.PushSample(samples[i]);
                             successCount++;
 
-                            // Progress feedback svakih 500 uzoraka
                             if ((i + 1) % 500 == 0)
                             {
                                 Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Progress: {i + 1}/{samples.Count} samples sent...");
@@ -171,7 +162,6 @@ namespace Client
                     Console.WriteLine($"  - Errors: {errorCount} samples");
                     Console.WriteLine();
 
-                    // EndSession
                     proxy.EndSession();
                     Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Session ended.");
                 }

@@ -10,10 +10,9 @@ namespace Client.Services
 {
     public class CsvReader
     {
-        private const int HEADER_ROW = 10; // Red 10 je header
-        private const int DATA_START_ROW = 11; // Podaci počinju od reda 11
+        private const int HEADER_ROW = 10; 
+        private const int DATA_START_ROW = 11; 
 
-        // Nazivi kolona koje tražimo
         private const string COL_NAME_TIMESTAMP = "# Date and time";
         private const string COL_NAME_WIND_SPEED = "Wind speed (m/s)";
         private const string COL_NAME_WIND_DIRECTION = "Wind direction (°)";
@@ -52,7 +51,6 @@ namespace Client.Services
                         if (lineNumber < HEADER_ROW)
                             continue;
 
-                        // Red 10 je header - kreiraj mapu kolona
                         if (lineNumber == HEADER_ROW)
                         {
                             string[] headers = ParseCsvLine(line);
@@ -60,7 +58,6 @@ namespace Client.Services
 
                             columnIndexMap = BuildColumnIndexMap(headers);
 
-                            // Provera da li smo našli sve potrebne kolone
                             if (columnIndexMap.Count < 10)
                             {
                                 errors.Add("Missing required columns in CSV header");
@@ -72,10 +69,9 @@ namespace Client.Services
                             continue;
                         }
 
-                        // Od reda 11 - parsiranje podataka
                         try
                         {
-                            string[] fields = ParseCsvLine(line); // ← Parsiraj prvo
+                            string[] fields = ParseCsvLine(line); 
                             var sample = ParseLine(fields, lineNumber, turbineId);
                             if (sample != null)
                             {
@@ -168,7 +164,6 @@ namespace Client.Services
 
         private double ParseDoubleOrThrow(string value, string fieldName)
         {
-            // Provera za NaN ili prazno
             if (string.IsNullOrWhiteSpace(value) || value.Trim().Equals("NaN", StringComparison.OrdinalIgnoreCase))
             {
                 throw new FormatException($"{fieldName} is NaN or empty");
@@ -204,7 +199,7 @@ namespace Client.Services
 
         private string[] ParseCsvLine(string line)
         {
-            // Koristi TextFieldParser za pravilno parsiranje CSV-a sa navodnicima
+            // TextFieldParser za pravilno parsiranje CSV-a sa navodnicima
             using (var parser = new TextFieldParser(new System.IO.StringReader(line)))
             {
                 parser.TextFieldType = FieldType.Delimited;

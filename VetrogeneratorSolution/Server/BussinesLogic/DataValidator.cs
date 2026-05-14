@@ -9,7 +9,6 @@ namespace Server.BusinessLogic
     {
         public void ValidateSample(WindTurbineSample sample)
         {
-            // Validacija timestamp-a
             if (sample.Timestamp == DateTime.MinValue || sample.Timestamp > DateTime.Now)
             {
                 throw new FaultException<ValidationFault>(
@@ -18,7 +17,6 @@ namespace Server.BusinessLogic
                 );
             }
 
-            // Validacija numeričkih vrednosti (moraju biti >= 0 ili razumne vrednosti)
 
             if (sample.WindSpeed < 0 || sample.WindSpeed > 100)
             {
@@ -60,7 +58,6 @@ namespace Server.BusinessLogic
                 );
             }
 
-            // Wind direction i Nacelle position (0-360 stepeni)
             if (sample.WindDirection < 0 || sample.WindDirection > 360)
             {
                 throw new FaultException<ValidationFault>(
@@ -77,7 +74,6 @@ namespace Server.BusinessLogic
                 );
             }
 
-            // Power factor (obično između -1 i 1)
             if (sample.PowerFactor < -1 || sample.PowerFactor > 1)
             {
                 throw new FaultException<ValidationFault>(
