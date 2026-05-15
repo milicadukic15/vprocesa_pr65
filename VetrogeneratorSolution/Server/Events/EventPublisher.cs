@@ -3,10 +3,8 @@ using Common.DataModels;
 
 namespace Server.Events
 {
-    /// Implementira Publish-Subscribe pattern
     public class EventPublisher
     {
-        // Singleton instance
         private static EventPublisher instance;
         private static readonly object lockObj = new object();
 
@@ -33,13 +31,11 @@ namespace Server.Events
             
         }
 
-        // Delegate za događaje
         public delegate void TransferStartedEventHandler(object sender, TransferStartedEventArgs e);
         public delegate void SampleReceivedEventHandler(object sender, SampleReceivedEventArgs e);
         public delegate void TransferCompletedEventHandler(object sender, TransferCompletedEventArgs e);
         public delegate void WarningRaisedEventHandler(object sender, WarningEventArgs e);
 
-        // Događaji
         public event TransferStartedEventHandler OnTransferStarted;
         public event SampleReceivedEventHandler OnSampleReceived;
         public event TransferCompletedEventHandler OnTransferCompleted;
