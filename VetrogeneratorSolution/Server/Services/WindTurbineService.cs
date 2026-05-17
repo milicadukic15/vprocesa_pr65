@@ -90,11 +90,6 @@ namespace Server.Services
 
                 if (totalSamplesReceived % 1000 == 0)
                 {
-                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Processed {totalSamplesReceived} samples...");
-                }
-
-                if (totalSamplesReceived % 500 == 0)
-                {
                     Events.EventPublisher.Instance.RaiseSampleReceived(
                         currentSession.TurbineId,
                         totalSamplesReceived,

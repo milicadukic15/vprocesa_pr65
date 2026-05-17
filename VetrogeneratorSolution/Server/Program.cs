@@ -13,6 +13,12 @@ namespace Server
             try
             {
                 Console.WriteLine("===========================================");
+                Console.WriteLine($"Working Directory: {Environment.CurrentDirectory}");
+                Console.WriteLine($"Base Directory: {AppDomain.CurrentDomain.BaseDirectory}");
+                Console.WriteLine("===========================================");
+                Console.WriteLine();
+
+                Console.WriteLine("===========================================");
                 Console.WriteLine("   WIND TURBINE DATA SERVICE - SERVER");
                 Console.WriteLine("===========================================");
                 Console.WriteLine();

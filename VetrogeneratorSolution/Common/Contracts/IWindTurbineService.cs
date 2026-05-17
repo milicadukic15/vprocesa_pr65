@@ -5,7 +5,7 @@ using Common.Exceptions;
 
 namespace Common.Contracts
 {
-    [ServiceContract]
+    [ServiceContract(SessionMode = SessionMode.Required)]
     public interface IWindTurbineService
     {
         [OperationContract]
